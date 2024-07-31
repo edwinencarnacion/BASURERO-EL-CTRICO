@@ -1,48 +1,47 @@
-// Inicialización
-Inicializar Arduino y componentes
-Definir umbral_seguridad = 20 // en centímetros
-Definir velocidad_normal = 200 // velocidad PWM de 0-255
-Definir velocidad_giro = 150
-Definir tiempo_giro = 500 // en milisegundos
+CONSTANTES:
+    PIN_TRIGGER = 9  // Pin para el trigger del sensor ultrasónico
+    PIN_ECHO = 10    // Pin para el echo del sensor ultrasónico
+    PIN_SERVO = 11   // Pin para controlar el servomotor
+    DISTANCIA_ACTIVACION = 30  // Distancia en cm para activar el basurero
+    ANGULO_ABIERTO = 90   // Ángulo del servo cuando la tapa está abierta
+    ANGULO_CERRADO = 0    // Ángulo del servo cuando la tapa está cerrada
+    TIEMPO_APERTURA = 5000  // Tiempo en milisegundos que la tapa permanece abierta
 
-// Bucle principal
-Mientras (verdadero) {
-    // Lectura del sensor
-    Leer distancia del sensor ultrasónico
+FUNCIÓN CONFIGURACIÓN:
+    INICIAR comunicación serial
+    CONFIGURAR PIN_TRIGGER como SALIDA
+    CONFIGURAR PIN_ECHO como ENTRADA
+    INICIALIZAR servomotor en PIN_SERVO
+    MOVER servomotor a ANGULO_CERRADO
+
+FUNCIÓN MEDIR_DISTANCIA:
+    ENVIAR pulso ultrasónico:
+        ESTABLECER PIN_TRIGGER en ALTO
+        ESPERAR 10 microsegundos
+        ESTABLECER PIN_TRIGGER en BAJO
     
-    // Lógica de navegación
-    Si (distancia < umbral_seguridad) {
-        // Obstáculo detectado
-        Detener motores de ruedas
-        
-        // Decidir dirección de giro
-        Si (número_aleatorio() > 0.5) {
-            Girar robot a la derecha con velocidad_giro
-        } Sino {
-            Girar robot a la izquierda con velocidad_giro
-        }
-        
-        Esperar tiempo_giro
-        
-    } Sino {
-        // Camino libre
-        Avanzar con velocidad_normal
-        Activar motor de barrido
-        
-        // Verificar batería cada 100 iteraciones
-        Si (contador % 100 == 0) {
-            Leer nivel de batería
-            Si (nivel_batería < 20%) {
-                Emitir señal de batería baja
-            }
-        }
-    }
+    MEDIR duración del eco recibido en PIN_ECHO
     
-    // Control de limpieza
-    Si (tiempo_de_limpieza > 30 minutos) {
-        Detener robot
-        Emitir señal de fin de limpieza
-    }
-        Incrementar contador
-    Esperar 100 milisegundos // para no sobrecargar el procesador
-}
+    CALCULAR distancia = (duración del eco / 2) * velocidad del sonido
+    DEVOLVER distancia
+
+FUNCIÓN ABRIR_TAPA:
+    MOVER servomotor a ANGULO_ABIERTO
+    ESPERAR TIEMPO_APERTURA
+    MOVER servomotor a ANGULO_CERRADO
+
+FUNCIÓN PRINCIPAL:
+    MIENTRAS verdadero:
+        distancia = LLAMAR MEDIR_DISTANCIA()
+        
+        SI distancia <= DISTANCIA_ACTIVACION:
+            IMPRIMIR "Objeto detectado a ", distancia, " cm. Abriendo tapa."
+            LLAMAR ABRIR_TAPA()
+        SINO:
+            IMPRIMIR "No se detecta objeto cercano. Distancia: ", distancia, " cm."
+        
+        ESPERAR 500 milisegundos  // Pequeña pausa para evitar lecturas continuas
+
+INICIAR PROGRAMA:
+    EJECUTAR FUNCIÓN CONFIGURACIÓN
+    EJECUTAR FUNCIÓN PRINCIPAL
