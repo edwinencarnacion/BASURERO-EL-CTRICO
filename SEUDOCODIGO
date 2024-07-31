@@ -1,0 +1,48 @@
+// Inicialización
+Inicializar Arduino y componentes
+Definir umbral_seguridad = 20 // en centímetros
+Definir velocidad_normal = 200 // velocidad PWM de 0-255
+Definir velocidad_giro = 150
+Definir tiempo_giro = 500 // en milisegundos
+
+// Bucle principal
+Mientras (verdadero) {
+    // Lectura del sensor
+    Leer distancia del sensor ultrasónico
+    
+    // Lógica de navegación
+    Si (distancia < umbral_seguridad) {
+        // Obstáculo detectado
+        Detener motores de ruedas
+        
+        // Decidir dirección de giro
+        Si (número_aleatorio() > 0.5) {
+            Girar robot a la derecha con velocidad_giro
+        } Sino {
+            Girar robot a la izquierda con velocidad_giro
+        }
+        
+        Esperar tiempo_giro
+        
+    } Sino {
+        // Camino libre
+        Avanzar con velocidad_normal
+        Activar motor de barrido
+        
+        // Verificar batería cada 100 iteraciones
+        Si (contador % 100 == 0) {
+            Leer nivel de batería
+            Si (nivel_batería < 20%) {
+                Emitir señal de batería baja
+            }
+        }
+    }
+    
+    // Control de limpieza
+    Si (tiempo_de_limpieza > 30 minutos) {
+        Detener robot
+        Emitir señal de fin de limpieza
+    }
+        Incrementar contador
+    Esperar 100 milisegundos // para no sobrecargar el procesador
+}
